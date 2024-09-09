@@ -1,5 +1,3 @@
-# Sly_UNA_Luw
-
 # Things to Check List (The Priority is Upper)
 
 ## Análisis de Diseño de Algoritmos

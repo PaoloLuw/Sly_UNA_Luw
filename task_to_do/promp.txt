@@ -1,0 +1,25 @@
+Asunto: Conversión de código Java a formato Markdown para GitHub
+
+Mensaje:
+
+Hola [Gpt],
+
+Estoy trabajando en un proyecto y he modificado un archivo Java. Quisiera que me ayudaras a convertir el código en formato Markdown para que pueda incluirlo en mi repositorio de GitHub.
+
+Aquí está el código Java que necesito convertir:
+
+
+Copiar código
+
+"
+public class Ejemplo {
+    public static void main(String[] args) {
+        System.out.println("Hola, mundo!");
+    }
+}"
+
+Por favor, conviértelo a un formato Markdown que pueda usar en GitHub para mostrar el código con resaltado de sintaxis.
+
+¡Gracias!
+
+Saludos, [Tu Nombre]
