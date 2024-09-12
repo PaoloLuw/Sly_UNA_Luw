@@ -1,0 +1,9 @@
+# depslib dependency file v1.0
+1726124981 source:d:\una_sly\sly_una_luw\una_s5\metodos_numericos\unid_1\bit_counting\counting_bit_2\main.cpp
+	<iostream>
+	<cmath>
+	<conio.h>
+	<string>
+	<windows.h>
+	<vector>
+
