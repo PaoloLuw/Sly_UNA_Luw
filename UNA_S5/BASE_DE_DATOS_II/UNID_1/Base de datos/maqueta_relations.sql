@@ -65,4 +65,3 @@ insert into Likes values(1316, 1304);
 insert into Likes values(1501, 1934);
 insert into Likes values(1934, 1501);
 insert into Likes values(1025, 1101);
-

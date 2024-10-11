@@ -23,6 +23,8 @@ DESCRIBE Highschooler;
 
 
 --------------- EJERCICIOS 01 --------------------
+
+
 DROP TRIGGER IF EXISTS after_insert_highschooler;
 
 DELIMITER //
@@ -38,14 +40,12 @@ BEGIN
         WHERE h.grade = NEW.grade AND h.ID != NEW.ID;
     END IF;
 END; //
-
 //
 
 DELIMITER ;
 
 INSERT INTO Highschooler (ID, name, grade) VALUES (2000, 'Friendly', 9);
 SELECT * FROM Likes;
-
 
 --------------- EJERCICIOS 02 --------------------
 DROP TRIGGER IF EXISTS manage_grade;
@@ -62,18 +62,25 @@ BEGIN
         SET NEW.grade = NULL;
     END IF;
 END; //
+DELIMITER ;
 
 INSERT INTO Highschooler (ID, name, grade) VALUES (2002, 'Ralph', NULL);
 INSERT INTO Highschooler (ID, name, grade) VALUES (2003, 'Oskar', 7);
-INSERT INTO Highschooler (ID, name, grade) VALUES (2004, 'Anna', 10);
-INSERT INTO Highschooler (ID, name, grade) VALUES (2005, 'Tom', 13); 
-
-delete from Highschooler where id = xxxx;
 
 SELECT * FROM Highschooler;
 
-DELIMITER ;
 
+
+
+
+
+
+
+
+
+
+
+delete from Highschooler where id = xxxx;
 
 --------------- EJERCICIOS 03 --------------------
 DROP TRIGGER IF EXISTS after_delete_highschooler;
@@ -95,9 +102,18 @@ SELECT * FROM Likes;
 DELIMITER ;
 
 
---------------- EJERCICIOS 04 --------------------
+
+
+INSERT INTO Highschooler (ID, name, grade) VALUES
+(3000, 'Ronald', 10),
+(3001, 'Miguel', 11),
+(3002, 'Diego', 12),
+(3003, 'Roger', 9),
+(3004, 'Sebastian', 10);
+
 DROP TRIGGER IF EXISTS after_update_likes;
 
+--------------- EJERCICIOS 04 --------------------
 DELIMITER //
 
 CREATE TRIGGER after_update_likes
@@ -112,17 +128,18 @@ BEGIN
 END; //
 
 DELIMITER ;
--- Likes
+
+----ANTES----
 INSERT INTO Likes (ID1, ID2) VALUES (3002, 3001); ---Miguel LE GUSTA Ronald
 INSERT INTO Friend (ID1, ID2) VALUES (3001, 3003);---Ronald and Roger
 INSERT INTO Friend (ID1, ID2) VALUES (3003, 3001);---Roger and Ronald
-SELECT * FROM Likes;
 SELECT * FROM Friend;
-DELETE FROM LIKES WHERE ID1 = 3002; 
 
-
+----DESPUES----
 UPDATE Likes SET ID2 = 3003 WHERE ID1 = 3002; -- Miguel ahora le gusta Roger
+SELECT * FROM Friend;
 
+DELETE FROM LIKES WHERE ID1 = 3002; 
 
 --------------- EJERCICIOS 05 --------------------
 CREATE TRIGGER simetriaI 
@@ -149,10 +166,11 @@ DROP TRIGGER simetriaD;
 
 SELECT * FROM Friend;
 
---------------- EJERCICIOS 06 --------------------
+
 DROP PROCEDURE IF EXISTS AddFriend;
 DROP PROCEDURE IF EXISTS RemoveFriend;
 
+--------------- EJERCICIOS 06 --------------------
 DELIMITER //
 
 CREATE PROCEDURE AddFriend(IN id1 INT, IN id2 INT)
@@ -169,9 +187,13 @@ BEGIN
     DELETE FROM Friend WHERE ID1 = id_1 AND ID2 = id_2;
     DELETE FROM Friend WHERE ID1 = id_2 AND ID2 = id_1;
 END //
-
 DELIMITER ;
+
+----ANTES----
 CALL AddFriend(3001, 3003);
+SELECT * FROM Friend;
+
+----DESPUES----
 CALL RemoveFriend(3001, 3003);
 SELECT * FROM Friend;
 
@@ -190,14 +212,19 @@ BEGIN
     UPDATE Highschooler SET grade = nuevo_grado WHERE ID = id_estudiante;
 
     UPDATE Highschooler 
+
     SET grade = grade + 1
+
     WHERE ID IN (
         SELECT ID2 FROM Friend WHERE ID1 = id_estudiante
     );
-END //
-    --- AND grade = grado_actual;
 
+END //
 DELIMITER ;
+
+----ANTES----¡
+SELECT * FROM Highschooler;
+----DESPUES----
 CALL actualizarGrade(1689, 10);
 SELECT * FROM Highschooler;
 
@@ -210,7 +237,6 @@ CREATE TABLE historialLikes (
     hora TIME,
     usuario VARCHAR(255)
 );
-
 
 DELIMITER //
 
@@ -226,5 +252,8 @@ DELIMITER ;
 
 
 DELETE FROM Likes WHERE ID1 = 1641 AND ID2 = 1468;
-
 SELECT * FROM  historialLikes;
+
+
+
+
