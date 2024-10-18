@@ -1,6 +1,6 @@
 -- Active: 1726693191808@@127.0.0.1@3306
 
-
+use fa_olap;
 ---------EJERCICIO 1-----------
 --a)
 SELECT RANK() OVER (ORDER BY AGE) AS rank_age,
@@ -27,7 +27,8 @@ FROM person;
     first_name,
     age,
     gender
-    FROM person;--lo que pasa es que los empata y asi se eliminan
+    FROM person;--lo que pasa es que los empata y salta
+    
 --b) 
 	INSERT INTO person VALUES (10, 'Peter', 22, 'M');
 
@@ -37,6 +38,7 @@ FROM person;
 		age,
 		gender
 	from person;
+
 --c)
     SELECT 
         DENSE_RANK() OVER (ORDER BY age) AS rank_age,
@@ -67,13 +69,15 @@ SELECT
 FROM student_grade;
 
 ---------EJERCICIO 4-----------
-
 select * -- algo asi como un join
 from Sales F, Store S, Item I, Customer C
 where F.storeID = S.storeID 
 	and F.itemID = I.itemID 
 	and F.custID = C.custID;
+
     -----60 TUPLAS Y 15 COLUMNAS
+
+    
 ---------EJERCICIO 5-----------
 
 SELECT 
@@ -180,7 +184,13 @@ GROUP BY
     F.itemID, 
     F.custID;
 
---1)
+
+
+
+
+
+
+--a)
 SELECT 
     F.storeID, 
     F.itemID, 
@@ -200,7 +210,12 @@ GROUP BY
     F.itemID, 
     F.custID;
 
---2)
+
+
+
+
+
+--b)
 SELECT 
     F.storeID, 
     F.itemID, 
@@ -214,57 +229,32 @@ JOIN
     Customer C ON F.custID = C.custID
 WHERE 
     S.state = 'WA' 
-    AND C.gender = 'M'  -- Considerando que 'M' representa masculino
+    AND C.gender = 'M'
 GROUP BY 
     F.storeID, 
     F.itemID, 
     F.custID;
 
 ---------EJERCICIO 8-----------
-SELECT 
-    storeID, 
-    itemID, 
-    custID, 
-    SUM(price) AS total_sales
-FROM 
-    Sales
-GROUP BY 
-    storeID, 
-    itemID, 
-    custID WITH ROLLUP
-UNION ALL
-SELECT
-    storeID, 
-    itemID, 
-    custID, 
-    SUM(price) AS total_sales
-FROM 
-    Sales
-GROUP BY 
-    itemID, 
-    custID, 
-    storeID WITH ROLLUP
-UNION ALL
-SELECT 
-    storeID, 
-    itemID, 
-    custID, 
-    SUM(price) AS total_sales
-FROM 
-    Sales
-GROUP BY 
-    custID, 
-    storeID, 
-    itemID WITH ROLLUP;
+select storeID, itemID, custID, sum(price)
+    from Sales
+    group by storeID, itemID, custID with rollup
+    union
+    select storeID, itemID, custID, sum(price)
+    from Sales
+    group by itemID, custID, storeID with rollup
+    union
+    select storeID, itemID, custID, sum(price)
+    from Sales
+    group by custID, storeID, itemID with rollup;
 
-
+---a)
 CREATE TABLE cubo (
     storeID CHAR(6),
     itemID CHAR(6),
     custID CHAR(6),
     total_sales DECIMAL(10, 2)
 );
-
 
 ---INSERTANDO INTO CUBO
 INSERT INTO cubo (storeID, itemID, custID, total_sales)
