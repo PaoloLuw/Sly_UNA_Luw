@@ -52,6 +52,7 @@ AND s.name LIKE 'S%'
 HAVING nro_cursos = 13;
 
 ------ Problema 3 --------
+DROP FUNCTION time_sum;
 
 DELIMITER //
 CREATE FUNCTION time_sum(slot_id VARCHAR(4))
@@ -66,8 +67,28 @@ CREATE FUNCTION time_sum(slot_id VARCHAR(4))
         RETURN total_time;
     END //
 DELIMITER ;
+----CORRECTION---
+DROP FUNCTION time_sum_CORRECTION;
+DELIMITER //
+CREATE FUNCTION time_sum_CORRECTION(slot_id VARCHAR(4))
+    RETURNS TIME 
+    READS SQL DATA
+    BEGIN
+        DECLARE total_time TIME;
+        -- Limitamos la consulta a una fila
+        SELECT SEC_TO_TIME(TIME_TO_SEC(TIMEDIFF(end_time, start_time)))
+        INTO total_time
+        FROM time_slot
+        WHERE time_slot_id = slot_id
+        LIMIT 1;  -- Aseguramos que solo devuelva una fila
+        RETURN total_time;
+    END //
+DELIMITER ;
 
-SELECT s.building, ts.day, SEC_TO_TIME(SUM(TIME_TO_SEC(TIMEDIFF(ts.end_time, ts.start_time)))) AS total_time
+
+
+SELECT s.building, ts.day, SEC_TO_TIME(SUM(TIME_TO_SEC(TIMEDIFF(ts.end_time, ts.start_time)))) 
+    AS total_time
 FROM section s
 JOIN time_slot ts ON s.time_slot_id = ts.time_slot_id
 WHERE s.building = 'Taylor'
@@ -75,8 +96,38 @@ AND ts.day = 'M'
 GROUP BY s.building, ts.day;
 
 
+----CORRECION ---------
+
+SELECT s.course_id, s.sec_id, TIME_SUM(s.time_slot_id) AS total_time
+FROM section s
+JOIN time_slot t ON s.time_slot_id = t.time_slot_id
+WHERE s.building = 'Taylor'
+  AND t.day = 'M';
+
+SELECT s.time_slot_id, TIME_SUM(s.time_slot_id) AS total_time
+FROM section s
+JOIN time_slot t ON s.time_slot_id = t.time_slot_id
+WHERE s.building = 'Taylor'
+  AND t.day = 'M';
+
+
+SELECT 
+    time_slot_id, TIME_SUM(time_slot_id)
+FROM
+    time_slot
+WHERE
+    time_slot_id IN (SELECT 
+            time_slot_id
+        FROM
+            section
+        WHERE
+            building = 'Taylor')
+       AND day = 'M';
+
+SELECT
+    time_slot_id, TIME_SUM(time_slot_id)
+
 ------ Problema 4 --------
-drop procedure proc_getCoursesOf;
 DELIMITER //
 
 CREATE PROCEDURE proc_getCoursesOf(
@@ -100,15 +151,46 @@ BEGIN
 END //
 DELIMITER ;
 
+
+----CORRECION ---------
+DROP PROCEDURE proc_getCoursesOf;
+DELIMITER //
+
+CREATE PROCEDURE proc_getCoursesOf(
+    IN person_id VARCHAR(5),
+    IN person_type INT
+)
+BEGIN
+    IF person_type = 1 THEN
+        SELECT s.name AS student_name, 
+               t.course_id, c.title AS course_name, t.sec_id, t.semester, t.year
+        FROM student s
+        JOIN takes t ON s.ID = t.ID JOIN course c ON t.course_id = c.course_id
+        WHERE s.ID = person_id;
+    
+    ELSEIF person_type = 2 THEN
+        SELECT i.name AS instructor_name, 
+               te.course_id, c.title AS course_name, te.sec_id, te.semester, te.year
+        FROM instructor i
+        JOIN teaches te ON i.ID = te.ID JOIN course c ON te.course_id = c.course_id
+        WHERE i.ID = person_id;
+        
+    ELSE
+        SELECT 'Entrada no válida.' AS ErrorMessage;
+    END IF;
+
+END //
+DELIMITER ;
+
+select * from
+
 CALL proc_getCoursesOf(1000, 1);
 CALL proc_getCoursesOf(3199, 2);
 
 
+DROP PROCEDURE proc_getRankingCourse;
 
 ------ Problema 5 --------
-
-
-
 DELIMITER //
 
 CREATE FUNCTION grade_to_number(grade VARCHAR(2))
@@ -135,15 +217,13 @@ BEGIN
         WHEN 'F+' THEN SET numeric_value = 1;
         WHEN 'F'  THEN SET numeric_value = 1;
         WHEN 'F-' THEN SET numeric_value = 1;
-        ELSE SET numeric_value = NULL;  -- Manejo de casos no reconocidos
+        ELSE SET numeric_value = NULL;  -- PARA NO 0ceros
     END CASE;
     RETURN numeric_value;
 END //
-
 DELIMITER ;
 
 
-DROP PROCEDURE proc_getRankingCourse;
 DELIMITER //
 
 CREATE PROCEDURE proc_getRankingCourse(
@@ -161,7 +241,6 @@ BEGIN
 END //
 
 DELIMITER ;
-
 
 CALL proc_getRankingCourse("239", 2006);
 
@@ -196,12 +275,24 @@ SELECT budget FROM department WHERE dept_name = 'Accounting';
 
 ------ Problema 7 --------
 
+--WITH RECURSIVE Route(orig, dest, total, length) AS (
+--    SELECT orig, dest, cost * (1 - descuento / 100.0) AS total, 1
+--    FROM Flight
+--    WHERE orig = 'A'
+--    UNION ALL
+--    SELECT R.orig, F.dest, R.total + (F.cost * (1 - F.descuento / 100.0)) AS total, R.length + 1
+--    FROM Route R
+--    JOIN Flight F ON R.dest = F.orig
+--    WHERE R.length < 100
+--)
+--SELECT MIN(total)
+--FROM Route
+--WHERE dest = 'B';
+
+
 ----RESUELTO EN EL GESTOR DE BASE DE DATOS POSTGRES
 
 ------ Problema 8 --------
-
-
-
 WITH StudentGrades AS (
     SELECT s.name, t.grade
     FROM takes t
@@ -215,6 +306,25 @@ SELECT
     name,
     grade AS nota
 FROM StudentGrades;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -267,7 +377,6 @@ DELIMITER ;
 
 DELETE FROM student WHERE ID = '99999';
 DELETE FROM instructor WHERE ID = '99998';
-
 SELECT * FROM auditoria ;
 
 
